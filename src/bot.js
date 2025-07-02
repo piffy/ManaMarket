@@ -1,5 +1,8 @@
 const { Client, IntentsBitField } = require('discord.js');
 const { handleMessage } = require('./messageParser');
+const { commands } = require('./register-commands');
+const fs = require('fs');
+const path = require('path');
 
 function startBot() {
   const client = new Client({
@@ -28,13 +31,91 @@ function startBot() {
 
     if (commandName === 'ping') {
       await interaction.reply('pong!');
+
+    } else if (commandName === 'list') {
+      // Elenca gli ordini pendenti leggendo da orders.txt
+      const ordersPath = path.join(__dirname, '..', 'orders.txt');
+      let reply = "Lista delle richieste attuali:\n";
+      try {
+        if (fs.existsSync(ordersPath)) {
+          const ordersContent = fs.readFileSync(ordersPath, 'utf-8').trim();
+          reply += ordersContent.length > 0 ? ordersContent : "*** nulla ***";
+        } else {
+          reply += "*** nulla ***";
+        }
+      } catch (err) {
+        reply += "*** errore nella lettura degli ordini ***";
+      }
+      await interaction.reply(reply);
+      
+    } else if (commandName === 'clr') {
+      // Cancella tutti gli ordini eliminando il file orders.txt
+      // ATTENZIONE, QUESTO COMANDO NON PUO' ESSERE ANNULLATO
+      const ordersPath = path.join(__dirname, '..', 'orders.txt');
+      try {
+        if (fs.existsSync(ordersPath)) {
+          fs.unlinkSync(ordersPath);
+          await interaction.reply('Tutti gli ordini sono stati cancellati. ATTENZIONE, QUESTO COMANDO NON PUO\' ESSERE ANNULLATO.');
+        } else {
+          await interaction.reply('Nessun ordine da cancellare.');
+        }
+      } catch (err) {
+        await interaction.reply('Errore durante la cancellazione degli ordini.');
+      }
+    
     } else if (commandName === 'help' || commandName === 'aiuto') {
-      await interaction.reply('Questo è un bot di controllo del mercato interno. Usa i comandi `/ping` o `/beep` per interagire con esso.');
-    } else {
+      // Costruisce il messaggio di aiuto dinamicamente dai comandi
+      let helpMessage = "**Comandi attivi:**\n";
+      commands.forEach(cmd => {
+        helpMessage += `\`/${cmd.name}\` - ${cmd.description}`;
+        if (cmd.options && cmd.options.length > 0) {
+          const params = cmd.options.map(opt => 
+            `${opt.name}${opt.required ? '' : ' (opzionale)'}`
+          ).join(', ');
+          helpMessage += `\n  Parametri: ${params}`;
+        }
+        helpMessage += '\n';
+      });
+      await interaction.reply(helpMessage);
+    
+    } else if (commandName === 'wtb') {
+      const item = interaction.options.getString('item'); 
+      const quantity = interaction.options.getInteger('quantity') || 1;   
+      const location = interaction.options.getString('location') || '';   
+      const displayName = interaction.member ? interaction.member.displayName : interaction.author.username;
+      const reply = `${displayName} WTB ${item}${quantity > 1 ? ` x${quantity}` : ''}${location ? ` @${location}` : ''}`; 
+      //TODO: check if item is valid, else reply with error message
+      //TODO: save the order to orders.txt
+      const ordersPath = path.join(__dirname, '..', 'orders.txt');
+      const orderLine = `${reply}\n`;
+      try {
+        fs.appendFileSync(ordersPath, orderLine, 'utf-8');
+      } catch (err) {
+        console.error('Errore durante il salvataggio dell\'ordine:', err);
+      }
+      await interaction.reply(reply);  
+
+    } else if (commandName === 'wts') {
+      const item = interaction.options.getString('item'); 
+      const quantity = interaction.options.getInteger('quantity') || 1;   
+      const location = interaction.options.getString('location') || '';   
+      const displayName = interaction.member ? interaction.member.displayName : interaction.author.username;
+      const reply = `${displayName} WTS ${item}${quantity > 1 ? ` x${quantity}` : ''}${location ? ` @${location}` : ''}`; 
+      //TODO: check if item is valid, else reply with error message
+      //TODO: save the order to orders.txt
+      const ordersPath = path.join(__dirname, '..', 'orders.txt');
+      const orderLine = `${reply}\n`;
+      try {
+        fs.appendFileSync(ordersPath, orderLine, 'utf-8');
+      } catch (err) {
+        console.error('Errore durante il salvataggio dell\'ordine:', err);
+      }
+      await interaction.reply(reply);  
+    }
+     else {
       await interaction.reply({ content: 'Unknown command', ephemeral: true });
     }
   }); 
-
 
 
   client.login(process.env.DISCORD_TOKEN)
