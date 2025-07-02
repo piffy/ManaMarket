@@ -21,6 +21,22 @@ function startBot() {
     handleMessage(message);
   });
 
+  client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+
+    const { commandName } = interaction;
+
+    if (commandName === 'ping') {
+      await interaction.reply('pong!');
+    } else if (commandName === 'help' || commandName === 'aiuto') {
+      await interaction.reply('Questo è un bot di controllo del mercato interno. Usa i comandi `/ping` o `/beep` per interagire con esso.');
+    } else {
+      await interaction.reply({ content: 'Unknown command', ephemeral: true });
+    }
+  }); 
+
+
+
   client.login(process.env.DISCORD_TOKEN)
     .then(() => {
       console.log('Bot is online!');
