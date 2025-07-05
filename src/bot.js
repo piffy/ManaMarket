@@ -3,6 +3,7 @@ const { handleMessage } = require('./messageParser');
 const { commands } = require('./register-commands');
 const fs = require('fs');
 const path = require('path');
+const { checkAndAddUser } = require('./userInteraction');
 
 function startBot() {
   const client = new Client({
@@ -29,6 +30,25 @@ function startBot() {
 
     const { commandName } = interaction;
 
+    //TODO: write a functions that checks check if discord user exists in the database
+    //if not, add it to the database and reply with a welcome msg
+    // this should be in a separate file, e.g. userInteraction.js
+    
+    // Check if the Discord user exists in the database, if not add and welcome
+    try {
+      const isNewUser = await checkAndAddUser(interaction.user);
+      if (isNewUser) {
+      await interaction.reply(`Benvenuto, ${interaction.user.username}! Il tuo account è stato registrato.`);
+      return;
+      }
+    } catch (err) {
+      console.error('Errore durante la verifica/aggiunta dell\'utente:', err);
+      await interaction.reply('Si è verificato un errore durante la registrazione dell\'utente.');
+      return;
+    }
+
+
+    
     if (commandName === 'ping') {
       await interaction.reply('pong!');
 

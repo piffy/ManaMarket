@@ -1,17 +1,25 @@
-const sequelize = require('../models/index');
+const { sequelize } = require('../models/index'); // Import sequelize instance
 
-describe('authenticate_StateValidConfig_ShouldConnectWithoutError', () => {
-  // Purpose: Test that Sequelize can connect to the SQLite database without throwing errors
+describe('Sequelize', () => {
+  // Edge case: Track if the connection was closed in a test
+  let isClosed = false;
 
-  // Setup: (none needed for this simple connection test)
+  // Teardown: Reconnect if the connection was closed in a test
+  afterEach(async () => {
+    if (isClosed) {
+      // Reconnect for other tests
+      await sequelize.sync();
+      isClosed = false;
+    }
+  });
 
+  /**
+   * Test: authenticate_StateValidConfig_ShouldConnectWithoutError
+   * Purpose: Ensure sequelize can authenticate with a valid config.
+   */
   test('authenticate_StateValidConfig_ShouldConnectWithoutError', async () => {
-    // Assertion: The authenticate method should resolve without throwing
+    // The authenticate method should resolve without throwing
     await expect(sequelize.authenticate()).resolves.not.toThrow();
   });
 
-  // Teardown: Close the connection after all tests
-  afterAll(async () => {
-    await sequelize.close();
-  });
 });

@@ -24,6 +24,11 @@ const  commands = [
     description: 'cancella tutti gli ordini. ATTENZIONE, QUESTO COMANDO NON PUO\' ESSERE ANNULLATO.',
     },
     {
+    name: 'users',
+    description: 'comando di prova, elenca gli utenti del sistema',
+
+    },
+    {
     name: 'wtb',
     description: 'Want To Buy - richiesta di acquisto.',
     options: [
