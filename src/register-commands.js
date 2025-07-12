@@ -12,21 +12,34 @@ const  commands = [
     description: 'Risponde con un messaggio infomativo su come usare il bot.'
     },
     {
-    name: 'aiuto',
-    description: 'Risponde con un messaggio infomativo su come usare il bot.'
-    },
-    {
     name: 'list',
     description: 'Elenca tutti gli ordini pendenti.'
     },
     {
-    name: 'clr',
-    description: 'cancella tutti gli ordini. ATTENZIONE, QUESTO COMANDO NON PUO\' ESSERE ANNULLATO.',
+    name: 'login',
+    description: 'collega il tuo account discord a uno specifico alt',
+    options: [
+      {
+        name: 'alt',
+        type: 3,
+        description: 'Il nome dell\'alt da collegare.',
+        type: ApplicationCommandOptionType.String, // STRING
+        required: true,
+      },
+    ],
     },
-    {
-    name: 'users',
-    description: 'comando di prova, elenca gli utenti del sistema',
-
+        {
+    name: 'register',
+    description: 'DEVELOP simula inserimento alt nel sistema',
+    options: [
+      {
+        name: 'alt',
+        type: 3,
+        description: 'Il nome dell\'alt da collegare.',
+        type: ApplicationCommandOptionType.String, // STRING
+        required: true,
+      },
+    ],
     },
     {
     name: 'wtb',

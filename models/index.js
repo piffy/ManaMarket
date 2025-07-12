@@ -10,50 +10,43 @@ const sequelize = new Sequelize({
 
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  account_id: {
     type: DataTypes.STRING(255),
+    primaryKey: true, // ID = nome del personaggio principale
     allowNull: false,
+    comment: 'EVE char name'
   },
   discord_id: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
   },
   refresh_token: {
     type: DataTypes.TEXT,
     allowNull: false,
+    comment: 'ESI refresh token'
   },
   access_token: {
     type: DataTypes.TEXT,
     allowNull: false,
+    comment: 'ESI access token'
   },
-  main: {
+  account: {
     type: DataTypes.STRING(255),
     allowNull: false,
-  },
-  alt: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  alt2: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
+    comment: 'Got by ESI, immutable'
   },
   created_at: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+  }
 }, {
   tableName: 'users',
-  timestamps: false, // We'll manage timestamps manually
+  timestamps: false, // timestamps gestiti manualmente
 });
-
 
 module.exports = { sequelize, User };

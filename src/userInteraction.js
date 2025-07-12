@@ -1,30 +1,76 @@
 const { User } = require('../models/index');
 
 /**
- * checkAndAddUser_StateUserObject_ShouldAddIfNotExists
+ * login(discordUser)
  * Purpose: Checks if a Discord user exists in the database by discord_id.
- * If not, adds the user and returns true. If exists, returns false.
- * @param {Object} discordUser - The Discord user object (must have id and username)
- * @returns {Promise<boolean>} - true if user was added, false if already exists
+ * If so, returns the full User resource
+ * if not, returns a "fake user" with id GUEST and discord_id set to the user's id without 
+ * modifying the database. 
+  * This is useful for allowing users to interact with the bot without needing to register first.
+* @param {String} discordUser - The Discord user object, typically from an interaction.
  */
-async function checkAndAddUser(discordUser) {
-  // Check if user exists by discord_id
-  const existing = await User.findOne({ where: { discord_id: discordUser.id } });
-  if (existing) {
-    return false;
+
+async function login(discordUser) {
+  if (!discordUser || !discordUser.id) {
+    // Edge case: discordUser is null or missing id
+    return {
+      id: 'GUEST',
+      discord_id: null,
+      account: null,
+      isGuest: true,
+    };
   }
-  // Create new user with minimal info (expand as needed)
-  await User.create({
-    account_id: discordUser.username,
-    discord_id: discordUser.id,
-    refresh_token: '', // Placeholder, adjust as needed
-    access_token: '',  // Placeholder, adjust as needed
-    main: discordUser.username,
-    alt: null,
-    alt2: null,
-  });
-  return true;
+
+  // Try to find the user in the database
+  const user = await User.findOne({ where: { discord_id: discordUser.id } });
+
+  if (user) {
+    // User exists, return full user resource
+    return user;
+  } else {
+    // User does not exist, return a "fake user" object
+    return {
+      id: 'GUEST',
+      discord_id: discordUser.id,
+      account: null,
+      isGuest: true,
+    };
+  }
 }
 
-module.exports = { checkAndAddUser }
+/**
+ * register(user_interaction)
+ * NOTE: This function is development only!!
+ * Purpose: Add user to the database if not exists,
+ * else flag an error.
+returns a messege with the user id and username, or a message indicating the user is already registered.
+ */
+async function register(alt) {
+
+  //console.log(user_interaction);
+  
+  // Check if user already exists
+  const existingUser = await User.findOne({ where: { id: alt } });
+
+  if (existingUser) {
+    // User already registered
+    return `DEVELOP: User ${existingUser.id} already registered`;
+  }
+
+  // Add new user to the database
+  const newUser = await User.create({
+    id: alt,
+    account:alt,
+    discord_id: null,
+    refresh_token: "RTOKEN",
+    access_token: "ATOKEN",
+  });
+
+  return `DEVELOP User ${newUser.id} registered in database`;
+}
+
+
+
+
+module.exports = { login, register };
 

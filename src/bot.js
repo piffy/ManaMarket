@@ -3,7 +3,8 @@ const { handleMessage } = require('./messageParser');
 const { commands } = require('./register-commands');
 const fs = require('fs');
 const path = require('path');
-const { checkAndAddUser } = require('./userInteraction');
+const { login, register } = require('./userInteraction');
+//const { register } = require('module');
 
 function startBot() {
   const client = new Client({
@@ -29,24 +30,37 @@ function startBot() {
     if (!interaction.isCommand()) return;
 
     const { commandName } = interaction;
+   
 
-    //TODO: write a functions that checks check if discord user exists in the database
-    //if not, add it to the database and reply with a welcome msg
-    // this should be in a separate file, e.g. userInteraction.js
-    
-    // Check if the Discord user exists in the database, if not add and welcome
-    try {
-      const isNewUser = await checkAndAddUser(interaction.user);
-      if (isNewUser) {
-      await interaction.reply(`Benvenuto, ${interaction.user.username}! Il tuo account è stato registrato.`);
-      return;
+    //TODO: write code that operates as follows
+    // if the command is /login,  call the function login
+    // with the interaction.user object as parameter  
+    //if the returned user is a guest, reply with an error message
+    // else, reply with a success message
+    // the returned user should be visible in the rest of the code here
+    let user=null;
+
+    if (commandName === 'login') {
+      // Call the login function with interaction.user
+      user = await login(interaction.user);
+      //TODO: authetication check.
+
+
+      // Check if the returned user is a guest
+      if (user && user.id === 'GUEST') {
+        await interaction.reply({ content: `${interaction.user}: accesso come ospite.`, ephemeral: true });
+      } else {
+        await interaction.reply({ content: `${interaction.user}: accesso come ${user.id}`, ephemeral: true });
       }
-    } catch (err) {
-      console.error('Errore durante la verifica/aggiunta dell\'utente:', err);
-      await interaction.reply('Si è verificato un errore durante la registrazione dell\'utente.');
-      return;
+      return; // Prevent further command handling
     }
 
+    if (commandName === 'register') {
+      const alt = interaction.options.getString('alt'); 
+      const message = await register(alt);
+      await interaction.reply({ content: message, ephemeral: true });
+      return; // Prevent further command handling
+    }
 
     
     if (commandName === 'ping') {
@@ -83,7 +97,7 @@ function startBot() {
         await interaction.reply('Errore durante la cancellazione degli ordini.');
       }
     
-    } else if (commandName === 'help' || commandName === 'aiuto') {
+    } else if (commandName === 'help') {
       // Costruisce il messaggio di aiuto dinamicamente dai comandi
       let helpMessage = "**Comandi attivi:**\n";
       commands.forEach(cmd => {
