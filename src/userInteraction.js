@@ -8,21 +8,25 @@ const { User } = require('../models/index');
  * modifying the database. 
   * This is useful for allowing users to interact with the bot without needing to register first.
 * @param {String} discordUser - The Discord user object, typically from an interaction.
+* @param {String} alt - The nave of the alt in EVE Online.
+* @returns {Object} - Returns a user object with the following properties:
+*   - id: The user's ID or 'GUEST' if not registered.
+*   - discord_id: The Discord ID of the user or null if not registered.
+*   - account: The EVE Online account name or null if not registered. 
  */
 
-async function login(discordUser) {
+async function login(discordUser,alt) {
   if (!discordUser || !discordUser.id) {
     // Edge case: discordUser is null or missing id
     return {
       id: 'GUEST',
       discord_id: null,
       account: null,
-      isGuest: true,
     };
   }
 
   // Try to find the user in the database
-  const user = await User.findOne({ where: { discord_id: discordUser.id } });
+  const user = await User.findOne({ where: { id: alt } });
 
   if (user) {
     // User exists, return full user resource
@@ -33,13 +37,12 @@ async function login(discordUser) {
       id: 'GUEST',
       discord_id: discordUser.id,
       account: null,
-      isGuest: true,
     };
   }
 }
 
 /**
- * register(user_interaction)
+ * register(alt)
  * NOTE: This function is development only!!
  * Purpose: Add user to the database if not exists,
  * else flag an error.

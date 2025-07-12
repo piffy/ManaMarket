@@ -41,8 +41,10 @@ function startBot() {
     let user=null;
 
     if (commandName === 'login') {
-      // Call the login function with interaction.user
-      user = await login(interaction.user);
+      // Call the login function with interaction.user and the alt parameter
+      const id = interaction.options.getString('alt'); 
+      user = await login(interaction.user,id);
+ 
       //TODO: authetication check.
 
 
