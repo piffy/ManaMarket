@@ -1,4 +1,5 @@
 const { User } = require('../models/index');
+const { Order } = require('../models/index');
 
 /**
  * login(discordUser)
@@ -73,7 +74,75 @@ async function register(alt) {
 }
 
 
+/**
+ * order_list(opt) 
+ * Purpose: Obtain a list of orders based on the provided filter option.
+ * If no option is provided, it returns all orders.
+ * The opt parameter can be:
+ * - 'm' for my orders (orders made by the user)
+ * - 'b' for buy orders (type === 1 )
+ * - 's' for sell orders (type === 2)
+ * - 'id' for a specific order ID, must be a number, must be the only parameter.
+ *
+ * 
+ * returns a text msg for each order follwing this format
+ * (order id) (type, converted to B  or S) (object name)x(quantity) (price) (date created)
+ * one line each order, with an header line like this:
+ * "Lista delle richieste attuali:\n"
+ * 
+ * @param {String} opt - The filter option for the orders.  
+ * @returns {String} - A string containing the list of orders
+ * 
+ */
+
+async function order_list(opt) {
+  // Header for the order list
+  let result = "Lista delle richieste attuali:\n";
+
+  let whereClause = {};
+
+  // Determine filter based on opt
+  if (!opt) {
+    // No filter, get all orders
+    whereClause = {};
+  } else if (opt === 'b') {
+    // Buy orders (type === 1)
+    whereClause = { type: 1 };
+  } else if (opt === 's') {
+    // Sell orders (type === 2)
+    whereClause = { type: 2 };
+  } else if (opt === 'm') {
+    // My orders - requires user context, but not provided here
+    // For demonstration, assume 'my orders' means orders with a specific property
+    // You may need to adjust this logic based on your actual user context
+    whereClause = { myOrder: true };
+  } else if (!isNaN(opt)) {
+    // Specific order ID
+    whereClause = { id: Number(opt) };
+  } else {
+    // Invalid option
+    return "Opzione non valida.";
+  }
+
+  // Fetch orders from database
+  const orders = await Order.findAll({ where: whereClause });
+
+  if (!orders || orders.length === 0) {
+    return result + "Nessun ordine trovato.";
+  }
+
+  // Format each order line
+  orders.forEach(order => {
+    const typeStr = order.type === 1 ? 'B' : (order.type === 2 ? 'S' : '?');
+    const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '';
+    result += `${order.id} ${typeStr} ${order.object_name}x${order.quantity} ${order.price} ${dateStr}\n`;
+  });
+
+  return "Ordini attuali:"+ result;
+  //return result;
+}
 
 
-module.exports = { login, register };
+
+module.exports = { login, register, order_list };
 

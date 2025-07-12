@@ -5,16 +5,24 @@ const  commands = [
   {     
 
     name: 'ping',
-    description: 'Risponde con pong!'
+    description: 'Risponde con pong e dà informazioni su di te!'
     },
     {
     name: 'help',
     description: 'Risponde con un messaggio infomativo su come usare il bot.'
     },
-    {
+ {
     name: 'list',
-    description: 'Elenca tutti gli ordini pendenti.'
-    },
+    description: 'Elenca tutti gli ordini pendenti.',
+    options: [
+      {
+        name: 'opt',
+        description: 'filtro:  (m)ine/(b)uy/(s)ell/[id]).',
+        type: 3, // STRING
+        required: false,
+      },
+    ],
+},
     {
     name: 'login',
     description: 'collega il tuo account discord a uno specifico alt',
@@ -41,6 +49,7 @@ const  commands = [
       },
     ],
     },
+    /**
     {
     name: 'wtb',
     description: 'Want To Buy - richiesta di acquisto.',
@@ -100,7 +109,7 @@ const  commands = [
       },
 
     ],
-    },
+    }, **/
 ]
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);   

@@ -3,7 +3,7 @@ const { handleMessage } = require('./messageParser');
 const { commands } = require('./register-commands');
 const fs = require('fs');
 const path = require('path');
-const { login, register } = require('./userInteraction');
+const { login, register, order_list } = require('./userInteraction');
 //const { register } = require('module');
 
 function startBot() {
@@ -64,27 +64,17 @@ function startBot() {
       return; // Prevent further command handling
     }
 
+    if (commandName === 'ping') {await interaction.reply(`${user}, pong!`); return;} 
     
-    if (commandName === 'ping') {
-      await interaction.reply('pong!');
-
-    } else if (commandName === 'list') {
-      // Elenca gli ordini pendenti leggendo da orders.txt
-      const ordersPath = path.join(__dirname, '..', 'orders.txt');
-      let reply = "Lista delle richieste attuali:\n";
-      try {
-        if (fs.existsSync(ordersPath)) {
-          const ordersContent = fs.readFileSync(ordersPath, 'utf-8').trim();
-          reply += ordersContent.length > 0 ? ordersContent : "*** nulla ***";
-        } else {
-          reply += "*** nulla ***";
-        }
-      } catch (err) {
-        reply += "*** errore nella lettura degli ordini ***";
-      }
+    if (commandName === 'list') {
+      // richiama la funzione order_list(opt) che restituisce un array di ordini
+      const opt = interaction.options.getString('opt') || ''; // ottiene l'opzione 'opt' o una stringa vuota se non presente
+      let reply = order_list(opt);
       await interaction.reply(reply);
       
-    } else if (commandName === 'clr') {
+    } 
+    
+    if (commandName === 'clr') {
       // Cancella tutti gli ordini eliminando il file orders.txt
       // ATTENZIONE, QUESTO COMANDO NON PUO' ESSERE ANNULLATO
       const ordersPath = path.join(__dirname, '..', 'orders.txt');

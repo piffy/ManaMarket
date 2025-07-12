@@ -49,4 +49,79 @@ const User = sequelize.define('User', {
   timestamps: false, // timestamps gestiti manualmente
 });
 
-module.exports = { sequelize, User };
+
+const Order = sequelize.define('Order', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
+  },
+  user_id: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  accepted_by_user_id: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+  },
+  accepted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+  },
+  type: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    comment: '1:buy or 2:sell'
+  },
+  status: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+    comment: '0:new - 1:committed - 2:completed - 3:canceled'
+  },
+  item_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  amount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+  },
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  price_policy: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  location_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  }
+}, {
+  tableName: 'orders',
+  timestamps: false,
+});
+
+module.exports = { sequelize, User, Order };
